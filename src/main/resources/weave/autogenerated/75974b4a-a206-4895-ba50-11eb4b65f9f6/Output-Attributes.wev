@@ -1,0 +1,6 @@
+%dw 2.0
+
+type auto_75974b4a_a206_4895_ba50_11eb4b65f9f6_Output_Attributes = {| requestId?: String |} {"typeId": "org.mule.extension.dynamodb.api.attributes.RequestIDAttribute",
+"class": "org.mule.extension.dynamodb.api.attributes.RequestIDAttribute",
+"typeAlias": "RequestIDAttribute"}
+

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:dynamodb="http://www.mulesoft.org/schema/mule/dynamodb"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/dynamodb http://www.mulesoft.org/schema/mule/dynamodb/current/mule-dynamodb.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="api" doc:id="f340454a-3437-4556-801e-311cde5f9cce" >
+		<http:listener doc:name="Listener" doc:id="936b349a-558d-4654-8e5d-127311aeed4f" config-ref="HTTP_Listener_config" path="/*"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c4b31ec0-7f6a-43c0-9421-5422c083b3aa" message="Flow started"/>
+		<set-variable value="#[payload.tableName]" doc:name="Set Variable" doc:id="c9a724b3-cb9c-4ecf-a0e2-105b67bf4af4" variableName="tableName" />
+		<choice doc:name="Choice" doc:id="6cf862b9-b66d-4207-a09d-f318894a0969" >
+			<when expression='#[attributes.relativePath == "/create"]'>
+				<flow-ref doc:name="createTable" doc:id="218177e1-3f08-41cf-a29e-9ee732681f02" name="createTable"/>
+			</when>
+			<when expression='#[attributes.relativePath == "/delete"]'>
+				<flow-ref doc:name="deleteTable" doc:id="ed8baa72-d33c-4a9a-8faf-181641d3f5e3" name="deleteTable"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="958188c0-e580-442d-8e66-df56c84980d3" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "resource not found 404"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<sub-flow name="createTable" doc:id="df3cdd6e-26a9-44b6-8170-eff4dcfaf43c" >
+		<logger level="INFO" doc:name="Logger" doc:id="26010bf0-7e0b-4f9a-ba88-e1ddcbd0573f" message="Create Flow Triggered"/>
+		<dynamodb:create-table readCapacityUnits="5" writeCapacityUnits="5" doc:name="Create table" doc:id="107c25b0-b38f-4b4e-b44a-54a906afa142" config-ref="Amazon_DynamoDB_Configuration" tableName="#[vars.tableName]">
+			<dynamodb:attribute-definitions>
+				<dynamodb:attribute-definition attributeName="Id" attributeType="STRING" />
+				<dynamodb:attribute-definition attributeName="message" attributeType="STRING" />
+			</dynamodb:attribute-definitions>
+			<dynamodb:key-schemas>
+				<dynamodb:key-schema-element attributeName="Id" keyType="HASH" />
+				<dynamodb:key-schema-element attributeName="message" keyType="RANGE" />
+			</dynamodb:key-schemas>
+		</dynamodb:create-table>
+		<ee:transform doc:name="Transform Message" doc:id="ffb780e3-d69d-41fa-9884-ced3d5022115">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="deleteTable" doc:id="75974b4a-a206-4895-ba50-11eb4b65f9f6" >
+		<logger level="INFO" doc:name="Logger" doc:id="f29d86ef-6002-4790-8cbf-a9ae9942a233" message="Dlete Flow Triggered" />
+		<dynamodb:delete-table tableName="#[vars.tableName]" doc:name="Delete table" doc:id="3c53e9aa-1812-4bc4-85ef-fc8ec275f7fc" config-ref="Amazon_DynamoDB_Configuration"/>
+		<ee:transform doc:name="Transform Message" doc:id="0d4e64ba-9323-4400-b70f-4ac0a3b9172a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>
