@@ -12,7 +12,7 @@ http://www.mulesoft.org/schema/mule/dynamodb http://www.mulesoft.org/schema/mule
 	<dynamodb:config name="Amazon_DynamoDB_Configuration" doc:name="Amazon DynamoDB Configuration" doc:id="9f0df6b5-3763-432a-925d-ffe2325826aa" >
 		<dynamodb:role-connection roleARN="${dynamo.db.rolearn}" accessKey="${dynamo.db.accesskey}" secretKey="${dynamo.db.secretkey}" />
 	</dynamodb:config>
-	<configuration-properties doc:name="Configuration properties" doc:id="50d50e0c-9a2a-497c-87ac-1c3be8545a96" file="yaml\dummy-${env}.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="50d50e0c-9a2a-497c-87ac-1c3be8545a96" file="yaml\DoAS-${env}.yaml" />
 	<global-property doc:name="Global Property" doc:id="79479a81-e5a6-4ec4-8d00-df0da5dbe01e" name="env" value="DEV" />
 	
 </mule>
